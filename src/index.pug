@@ -1,2 +1,14 @@
-block body
-  p Bonjour
+include /head.mixin.pug
+include /atom/title/title.mixin.pug
+include /atom/paragraph/paragraph.mixin.pug
+include /template/layout/layout.mixin.pug
+
+doctype html
+html(lang='fr')
+  +head
+  body
+    +layout
+      +title Mon site web à déployer
+      +paragraph Mon site web fonctionne bien en local et j'en suis fier 💪
+      +paragraph Pendant ce live, voyons comment le déployer !
+      :reload
