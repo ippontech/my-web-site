@@ -1,5 +1,5 @@
 locals {
-  role_name = "twitch-live-1710204-my-web-site"
+  role_name = "twitch-live-17102024-my-web-site"
 }
 
 import {
@@ -102,7 +102,7 @@ data "aws_iam_policy_document" "twitch_live_runner" {
       "iam:*"
     ]
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/twitch-live-1710204-my-web-site"
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/twitch-live-17102024-my-web-site"
     ]
   }
 }
