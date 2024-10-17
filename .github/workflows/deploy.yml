@@ -38,19 +38,55 @@ jobs:
       - run: terraform plan -out=tfplan.out
       - run: terraform apply -input=false tfplan.out
 
+  terraform-20-cloudfront:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure/20_cloudfront
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::448878779811:role/twitch-live-1710204-my-web-site
+          role-session-name: github-ipppontech-my-web-site-to-aws-via-oidc
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.7"
+          terraform_wrapper: false
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false
+      - run: terraform validate
+      - run: terraform init
+      - run: terraform plan -out=tfplan.out
+      - run: terraform apply -input=false tfplan.out
+
   build:
     needs:
       - terraform-10-boostrap
+      - terraform-20-cloudfront
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::448878779811:role/twitch-live-1710204-my-web-site
+          role-session-name: github-ipppontech-my-web-site-to-aws-via-oidc
+          aws-region: ${{ env.AWS_REGION }}
       - name: Use Node.js LTS
         uses: actions/setup-node@v4
         with:
           cache: 'npm'
           node-version: 'lts/*'
           registry-url: 'https://registry.npmjs.org'
+      - uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2
+          verbose: false
       - name: build
         run: |
           npm ci
           npm run build
+      - name: copy dist folder to S3
+        run: |
+          aws s3 cp --recursive dist s3://twitch-live-17102024-my-web-site-origin/
