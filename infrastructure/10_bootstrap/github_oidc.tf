@@ -1,10 +1,5 @@
 locals {
-  role_name = "twitch-live-1710204-my-web-site"
-}
-
-import {
-  to = aws_iam_openid_connect_provider.github
-  id = "arn:aws:iam::448878779811:oidc-provider/token.actions.githubusercontent.com"
+  role_name = "twitch-live-17102024-my-web-site"
 }
 
 resource "aws_iam_openid_connect_provider" "github" {
@@ -15,11 +10,6 @@ resource "aws_iam_openid_connect_provider" "github" {
   ]
 
   thumbprint_list = ["d89e3bd43d5d909b47a18977aa9d5ce36cee184c"]
-}
-
-import {
-  to = aws_iam_role.twitch_live
-  id = local.role_name
 }
 
 resource "aws_iam_role" "twitch_live" {
@@ -102,7 +92,7 @@ data "aws_iam_policy_document" "twitch_live_runner" {
       "iam:*"
     ]
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/twitch-live-1710204-my-web-site"
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/twitch-live-17102024-my-web-site"
     ]
   }
 }

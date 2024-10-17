@@ -3,7 +3,8 @@ locals {
 }
 
 module "cdn" {
-  source = "terraform-aws-modules/cloudfront/aws"
+  source  = "terraform-aws-modules/cloudfront/aws"
+  version = "3.4.1"
 
   # aliases = ["cdn.example.com"]
 
@@ -12,7 +13,7 @@ module "cdn" {
   is_ipv6_enabled     = true
   price_class         = "PriceClass_All"
   retain_on_delete    = false
-  wait_for_deployment = false
+  wait_for_deployment = true
 
   create_origin_access_identity = true
 
@@ -37,6 +38,7 @@ module "cdn" {
     target_origin_id       = local.origin_id
     viewer_protocol_policy = "allow-all"
   }
+
   #   viewer_certificate = {
   #     acm_certificate_arn = "arn:aws:acm:us-east-1:135367859851:certificate/1032b155-22da-4ae0-9f69-e206f825458b"
   #     ssl_support_method  = "sni-only"

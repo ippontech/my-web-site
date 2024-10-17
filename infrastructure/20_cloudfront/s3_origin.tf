@@ -3,13 +3,13 @@ locals {
 }
 
 module "s3_bucket" {
-  source = "terraform-aws-modules/s3-bucket/aws"
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "4.2.1"
 
   bucket = local.origin_bucket_name
-  acl    = "private"
 
   control_object_ownership = true
-  object_ownership         = "ObjectWriter"
+  object_ownership         = "BucketOwnerEnforced"
 
   server_side_encryption_configuration = {
     rule = {
@@ -19,15 +19,36 @@ module "s3_bucket" {
     }
   }
 
-  # policy = data.aws_iam_policy_document.origin_bucket_policy.json
+  attach_policy = true
+  policy        = data.aws_iam_policy_document.origin_bucket_policy.json
+
+  # For tests only
+  force_destroy = true
 }
 
 
-# data "aws_iam_policy_document" "origin_bucket_policy" {
-#   statement {
-#     effect = "Allow"
-#     principals {
-#
-#     }
-#   }
-# }
+data "aws_iam_policy_document" "origin_bucket_policy" {
+  # Origin Access Controls
+  statement {
+    sid = "S3GetObjectsDistribution"
+    actions = [
+      "s3:GetObject"
+    ]
+    resources = [
+      "${module.s3_bucket.s3_bucket_arn}/*"
+    ]
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceArn"
+      values = [
+        module.cdn.cloudfront_distribution_arn
+      ]
+    }
+  }
+}

@@ -8,6 +8,9 @@ on:
 
 env:
   AWS_REGION: eu-west-3
+  ORIGIN_BUCKET_NAME: twitch-live-17102024-my-web-site-origin
+  ROLE_ARN: arn:aws:iam::448878779811:role/twitch-live-17102024-my-web-site
+  ROLE_SESSON_NAME: github-ipppontech-my-web-site-to-aws-via-oidc
 
 # Permission can be added at job level or workflow level
 permissions:
@@ -24,8 +27,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::448878779811:role/twitch-live-1710204-my-web-site
-          role-session-name: github-ipppontech-my-web-site-to-aws-via-oidc
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: ${{ env.ROLE_SESSION_NAME }}
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
         with:
@@ -47,8 +50,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::448878779811:role/twitch-live-1710204-my-web-site
-          role-session-name: github-ipppontech-my-web-site-to-aws-via-oidc
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: ${{ env.ROLE_SESSION_NAME }}
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
         with:
@@ -70,8 +73,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::448878779811:role/twitch-live-1710204-my-web-site
-          role-session-name: github-ipppontech-my-web-site-to-aws-via-oidc
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: ${{ env.ROLE_SESSION_NAME }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Use Node.js LTS
         uses: actions/setup-node@v4
@@ -87,6 +90,18 @@ jobs:
         run: |
           npm ci
           npm run build
+      - name: clean S3 origin bucket
+        run: |
+          objects_number=$(aws s3 ls s3://twitch-live-17102024-my-web-site-origin/ --recursive | wc -l)
+          if [ "$objects_number" -gt "0" ]; then
+            aws s3api delete-objects \
+              --bucket ${{ env.ORIGIN_BUCKET_NAME }} \
+              --delete "$(aws s3api list-object-versions \
+              --bucket ${{ env.ORIGIN_BUCKET_NAME }} \
+              --output=json \
+              --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')";
+          fi
+
       - name: copy dist folder to S3
         run: |
-          aws s3 cp --recursive dist s3://twitch-live-17102024-my-web-site-origin/
+          aws s3 cp --recursive dist s3://${{ env.ORIGIN_BUCKET_NAME }}/
