@@ -52,6 +52,11 @@ resource "aws_iam_role_policy_attachment" "cloudfront" {
   policy_arn = "arn:aws:iam::aws:policy/CloudFrontFullAccess"
 }
 
+resource "aws_iam_role_policy_attachment" "acm" {
+  role       = aws_iam_role.twitch_live.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSCertificateManagerFullAccess"
+}
+
 resource "aws_iam_role_policy" "twitch_live_runner" {
   name   = "${local.role_name}-runner"
   role   = aws_iam_role.twitch_live.id
@@ -93,6 +98,27 @@ data "aws_iam_policy_document" "twitch_live_runner" {
     ]
     resources = [
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/twitch-live-17102024-my-web-site"
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "route53:ListHostedZones",
+    ]
+    resources = [
+      "*"
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "route53:GetHostedZone",
+      "route53:ChangeResourceRecordSets",
+      "route53:ListResourceRecordSets",
+      "route53:ListTagsForResource",
+    ]
+    resources = [
+      "arn:aws:route53:::hostedzone/Z0612444205RFX4C90XIM"
     ]
   }
 }
