@@ -12,3 +12,27 @@
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
+
+######################
+# Terraform
+######################
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# tf plan files
+**.tfplan
+**.plan.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+~
+# ignore temp doc file
+doc.md
+
+# ignore zip files generated with data_archive
+*.zip
